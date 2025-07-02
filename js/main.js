@@ -5,6 +5,7 @@ import Player from './Player.js';
 import Projectile from './Projectile.js';
 import Enemy from './Enemy.js';
 import XPOrb from './XPOrb.js';
+import CARD_UPGRADES from './CardUpgrades.js';
 
 // SETUP
 const canvas = document.getElementById('gameCanvas');
@@ -219,7 +220,54 @@ function draw() {
     }
 }
 
+// --- CARD CHOICE UI LOGIC ---
+
+const cardChoiceModal = document.getElementById('card-choice-modal');
+const cardChoiceContainer = document.getElementById('card-choice-container');
+let gamePausedForLevelUp = false;
+
+function showCardChoice(player) {
+    // Pick 3 random upgrades
+    const choices = CARD_UPGRADES.sort(() => 0.5 - Math.random()).slice(0, 3);
+    cardChoiceContainer.innerHTML = '';
+    choices.forEach((card, idx) => {
+        const div = document.createElement('div');
+        div.className = 'card-choice';
+        div.innerHTML = `
+            <div class="card-icon">${card.icon}</div>
+            <div class="card-title">${card.title}</div>
+            <div class="card-desc">${card.desc}</div>
+        `;
+        div.onclick = () => {
+            card.apply(player);
+            cardChoiceModal.style.display = 'none';
+            gamePausedForLevelUp = false;
+            updateUI();
+            requestAnimationFrame(gameLoop);
+        };
+        cardChoiceContainer.appendChild(div);
+    });
+    cardChoiceModal.style.display = 'flex';
+    gamePausedForLevelUp = true;
+}
+
+// Save the original gainXP
+const origGainXP = player.gainXP.bind(player);
+
+// Override gainXP to support card choice UI
+player.gainXP = function(amount) {
+    this.xp += amount;
+    if (this.xp >= this.xpToNextLevel) {
+        // Pause the game and show card choice
+        gamePausedForLevelUp = true;
+        this.levelUp(() => showCardChoice(this));
+    }
+};
+
+// Patch gameLoop to pause for card choice
+const origGameLoop = gameLoop;
 function gameLoop() {
+    if (gamePausedForLevelUp) return;
     update();
     draw();
     requestAnimationFrame(gameLoop);

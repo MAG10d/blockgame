@@ -60,3 +60,62 @@ canvas {
     border-radius: 50%;
     pointer-events: none;
 }
+
+/* MODAL STYLES */
+.modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+#card-choice-container {
+    display: flex;
+    gap: 30px;
+    background: #222;
+    padding: 30px 40px;
+    border-radius: 16px;
+    box-shadow: 0 0 20px #000;
+}
+
+.card-choice {
+    width: 180px;
+    height: 240px;
+    background: #444;
+    border: 3px solid #fff;
+    border-radius: 12px;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 2px 8px #000a;
+}
+
+.card-choice:hover {
+    transform: scale(1.07);
+    box-shadow: 0 4px 16px #ff0a;
+    border-color: gold;
+}
+
+.card-title {
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.card-desc {
+    font-size: 1em;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.card-icon {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}

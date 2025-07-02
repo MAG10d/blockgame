@@ -68,16 +68,16 @@ export default class Player {
 
     /**
      * Handles the logic for leveling up the player.
+     * @param {function} onLevelUp - Optional callback to trigger on level up (for UI, etc).
      */
-    levelUp() {
+    levelUp(onLevelUp) {
         this.level++;
         this.xp -= this.xpToNextLevel; // Subtract the cost, carry over any extra XP
         this.xpToNextLevel = Math.floor(this.xpToNextLevel * 1.5); // Increase cost for the next level
 
-        // Apply a level-up reward!
-        console.log(`Leveled up to ${this.level}! Weapon cooldown improved.`);
-        
-        // Make the weapon fire 10% faster, with a minimum cooldown of 10 frames.
-        this.weapon.cooldown = Math.max(10, this.weapon.cooldown * 0.9);
+        // Instead of applying a reward here, call the callback for UI
+        if (typeof onLevelUp === 'function') {
+            onLevelUp(this);
+        }
     }
 }
