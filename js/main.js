@@ -1,5 +1,6 @@
 'use strict';
 
+// Import all our classes
 import Player from './Player.js';
 import Projectile from './Projectile.js';
 import Enemy from './Enemy.js';
@@ -15,7 +16,7 @@ const characterDisplay = document.getElementById('character-display');
 const weaponDisplay = document.getElementById('weapon-display');
 const xpBarFill = document.getElementById('xp-bar-fill');
 
-// DATA (no changes)
+// DATA
 const characterData = {
     'warrior': { name: 'Warrior', width: 30, height: 30, color: 'deepskyblue', speed: 4 }
 };
@@ -28,7 +29,7 @@ const player = new Player(canvas.width / 2, canvas.height / 2, characterData.war
 const projectiles = [], enemies = [], xpOrbs = [];
 let weaponCooldownTimer = 0, enemySpawnTimer = 0;
 
-// MODIFIED: Unified input state
+// Unified input state for both keyboard and touch
 const inputState = {
     keys: {
         w: false, a: false, s: false, d: false,
@@ -53,7 +54,7 @@ window.addEventListener('keyup', (e) => {
     if (inputState.keys.hasOwnProperty(e.key)) inputState.keys[e.key] = false;
 });
 
-// NEW: Touch Handlers
+// Touch Handlers for mobile
 canvas.addEventListener('touchstart', (e) => {
     e.preventDefault(); // Prevent screen scrolling
     inputState.touch.isDragging = true;
@@ -81,7 +82,8 @@ canvas.addEventListener('touchcancel', (e) => {
 });
 
 
-// HELPER FUNCTIONS (fireWeapon, spawnEnemy, checkCollisions, updateUI - no changes)
+// --- HELPER FUNCTIONS ---
+
 function fireWeapon() {
     const weapon = player.weapon;
     const angle = Math.random() * 2 * Math.PI;
@@ -106,6 +108,7 @@ function spawnEnemy() {
 }
 
 function checkCollisions() {
+    // Projectile vs Enemy collision
     projectiles.forEach(proj => {
         enemies.forEach(enemy => {
             if (proj.x < enemy.x + enemy.width && proj.x + proj.width > enemy.x &&
@@ -116,12 +119,15 @@ function checkCollisions() {
             }
         });
     });
+
+    // Player vs XPOrb collision
     xpOrbs.forEach(orb => {
         if (player.x < orb.x + orb.width && player.x + player.width > orb.x &&
             player.y < orb.y + orb.height && player.y + player.height > orb.y) {
+            
             player.gainXP(orb.value);
             orb.markedForDeletion = true;
-            updateUI();
+            updateUI(); // Update UI immediately for a responsive feel
         }
     });
 }
@@ -137,7 +143,7 @@ function updateUI() {
 // --- GAME LOOP FUNCTIONS ---
 
 function update() {
-    // MODIFIED: Unified movement logic
+    // Determine movement direction from input
     const move = { x: 0, y: 0 };
     if (inputState.touch.isDragging) {
         // Touch input has priority
@@ -145,8 +151,7 @@ function update() {
         const dy = inputState.touch.currentY - inputState.touch.startY;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
-        // Use a deadzone of 10 pixels
-        if (distance > 10) {
+        if (distance > 10) { // Use a deadzone of 10 pixels
             move.x = dx / distance;
             move.y = dy / distance;
         }
@@ -158,15 +163,17 @@ function update() {
         if (keys.a || keys.ArrowLeft) move.x -= 1;
         if (keys.d || keys.ArrowRight) move.x += 1;
     }
+    
     // Apply movement to the player
-    player.move(move.x, move.y);
+    // THE FIX: We pass 'canvas' here so the Player knows the world boundaries.
+    player.move(move.x, move.y, canvas);
 
     // Update other game objects
     enemies.forEach(enemy => enemy.update(player));
     projectiles.forEach(proj => proj.update());
     xpOrbs.forEach(orb => orb.update());
 
-    // Timers and Spawning
+    // Handle timers and spawning
     if (--weaponCooldownTimer <= 0) {
         fireWeapon();
         weaponCooldownTimer = player.weapon.cooldown;
@@ -176,10 +183,10 @@ function update() {
         enemySpawnTimer = 90;
     }
 
-    // Collisions
+    // Handle collisions
     checkCollisions();
 
-    // Cleanup
+    // Clean up marked items from all arrays
     projectiles.splice(0, projectiles.length, ...projectiles.filter(p => !p.markedForDeletion && p.x > -10 && p.x < canvas.width + 10 && p.y > -10 && p.y < canvas.height + 10));
     enemies.splice(0, enemies.length, ...enemies.filter(e => !e.markedForDeletion));
     xpOrbs.splice(0, xpOrbs.length, ...xpOrbs.filter(o => !o.markedForDeletion));
@@ -187,14 +194,16 @@ function update() {
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw game objects
     player.draw(ctx);
     enemies.forEach(enemy => enemy.draw(ctx));
     projectiles.forEach(proj => proj.draw(ctx));
     xpOrbs.forEach(orb => orb.draw(ctx));
 
-    // NEW: Draw the virtual joystick if dragging
+    // Draw the virtual joystick if dragging
     if (inputState.touch.isDragging) {
-        ctx.save(); // Save current context state
+        ctx.save();
         // Base of the joystick
         ctx.beginPath();
         ctx.arc(inputState.touch.startX, inputState.touch.startY, 40, 0, Math.PI * 2);
@@ -206,7 +215,7 @@ function draw() {
         ctx.arc(inputState.touch.currentX, inputState.touch.currentY, 25, 0, Math.PI * 2);
         ctx.fillStyle = "rgba(200, 200, 200, 0.5)";
         ctx.fill();
-        ctx.restore(); // Restore context state
+        ctx.restore();
     }
 }
 
