@@ -16,7 +16,6 @@ export default class Player {
         this.xpToNextLevel = 10;
 
         // Player holds a copy of its weapon's data.
-        // This is crucial for individual upgrades.
         this.weapon = { ...weaponData.magicMissile };
     }
 
@@ -24,8 +23,9 @@ export default class Player {
      * Moves the player based on a directional vector.
      * @param {number} dx - The movement direction on the x-axis (-1 for left, 1 for right).
      * @param {number} dy - The movement direction on the y-axis (-1 for up, 1 for down).
+     * @param {HTMLCanvasElement} canvas - THE FIX: The canvas element for boundary checking.
      */
-    move(dx, dy) {
+    move(dx, dy, canvas) { // THE FIX: Added 'canvas' as a parameter here
         // Normalize the movement vector if moving diagonally to prevent faster diagonal speed.
         const length = Math.sqrt(dx * dx + dy * dy);
         if (length > 0) {
@@ -38,6 +38,7 @@ export default class Player {
         this.y += dy * this.speed;
 
         // Boundary detection to keep the player within the canvas.
+        // THE FIX: This code now works because 'canvas' is defined.
         if (this.x < 0) this.x = 0;
         if (this.x + this.width > canvas.width) this.x = canvas.width - this.width;
         if (this.y < 0) this.y = 0;
