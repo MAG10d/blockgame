@@ -35,11 +35,38 @@ const CARD_UPGRADES = [
         }
     },
     {
-        title: 'Heal',
-        desc: 'Restore to full health (future use)',
+        title: 'Max Health Up',
+        desc: '+25 max health and heal full',
         icon: '❤️',
         apply: (player) => {
-            // Placeholder for future health system
+            player.maxHealth += 25;
+            player.health = player.maxHealth; // Full heal
+            player.updateSprite();
+        }
+    },
+    {
+        title: 'Regeneration',
+        desc: 'Restore 30 health',
+        icon: '💚',
+        apply: (player) => {
+            player.heal(30);
+        }
+    },
+    {
+        title: 'Iron Skin',
+        desc: 'Longer invulnerability time',
+        icon: '🛡️',
+        apply: (player) => {
+            player.maxInvulnerabilityTime = Math.floor(player.maxInvulnerabilityTime * 1.5);
+        }
+    },
+    {
+        title: 'Stronger Bullets',
+        desc: 'Projectiles deal more damage',
+        icon: '💥',
+        apply: (player) => {
+            // This will be used in collision detection
+            player.weapon.damage = (player.weapon.damage || 20) + 10;
         }
     }
 ];

@@ -5,9 +5,16 @@ body {
     text-align: center;
 }
 
-canvas {
+/* PixiJS canvas styling */
+#game-container {
+    display: inline-block;
+    margin: 0 auto;
+}
+
+#game-container canvas {
     background-color: #000;
     border: 2px solid #fff;
+    display: block;
 }
 
 /* NEW UI STYLES */
@@ -118,4 +125,112 @@ canvas {
 .card-icon {
     font-size: 2.5em;
     margin-bottom: 10px;
+}
+
+/* GAME OVER MODAL STYLES */
+#game-over-container {
+    background: linear-gradient(135deg, #2c1810, #1a0f0a);
+    border: 3px solid #ff4444;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 0 40px rgba(255, 68, 68, 0.3);
+    text-align: center;
+    min-width: 400px;
+    max-width: 600px;
+}
+
+.game-over-title {
+    font-size: 2.5em;
+    color: #ff4444;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+}
+
+#game-stats {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #666;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 30px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    text-align: left;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #444;
+}
+
+.stat-label {
+    color: #ccc;
+    font-size: 1em;
+}
+
+.stat-value {
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.game-over-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.game-over-btn {
+    background: linear-gradient(135deg, #333, #555);
+    border: 2px solid #666;
+    border-radius: 12px;
+    color: #fff;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 150px;
+    font-family: inherit;
+}
+
+.game-over-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.respawn-btn {
+    border-color: #4CAF50;
+    background: linear-gradient(135deg, #2e7d2e, #4CAF50);
+}
+
+.respawn-btn:hover {
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+}
+
+.restart-btn {
+    border-color: #ff9800;
+    background: linear-gradient(135deg, #e65100, #ff9800);
+}
+
+.restart-btn:hover {
+    box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
+}
+
+.btn-icon {
+    font-size: 2em;
+    margin-bottom: 8px;
+}
+
+.btn-text {
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.btn-desc {
+    font-size: 0.9em;
+    color: #ccc;
+    line-height: 1.3;
 }
