@@ -5,10 +5,10 @@ export default class XPOrb {
         this.width = 8;
         this.height = 8;
         this.color = 'yellow';
+        this.value = 5; // NEW: Each orb is worth 5 XP
         this.markedForDeletion = false;
     }
 
-    // Orbs don't move on their own (yet)
     update() {}
 
     draw(ctx) {
