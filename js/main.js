@@ -40,10 +40,17 @@ async function initializeGame() {
         }
         gameContainer.appendChild(app.canvas);
         
+        // 設置固定畫布大小，留出空間給 UI
+        const canvasWidth = Math.min(1200, window.innerWidth - 40);
+        const canvasHeight = Math.min(800, window.innerHeight - 120);
+        app.renderer.resize(canvasWidth, canvasHeight);
+        
         // Handle window resize
         function handleResize() {
-            app.renderer.resize(window.innerWidth, window.innerHeight);
-            cameraSystem.resize(window.innerWidth, window.innerHeight);
+            const newCanvasWidth = Math.min(1200, window.innerWidth - 40);
+            const newCanvasHeight = Math.min(800, window.innerHeight - 120);
+            app.renderer.resize(newCanvasWidth, newCanvasHeight);
+            cameraSystem.resize(newCanvasWidth, newCanvasHeight);
         }
         window.addEventListener('resize', handleResize);
 
@@ -62,7 +69,7 @@ async function initializeGame() {
     const inputSystem = new InputSystem(app.canvas || app.view);
     const uiSystem = new UISystem();
     const upgradeSystem = new UpgradeSystem(app);
-    const cameraSystem = new CameraSystem(worldContainer, app.screen.width, app.screen.height);
+    const cameraSystem = new CameraSystem(worldContainer, canvasWidth, canvasHeight);
 
     // GAME STATE
     const worldBounds = cameraSystem.getWorldBounds();
@@ -306,13 +313,40 @@ async function initializeGame() {
             background: #3498db;
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-size: 16px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
             cursor: pointer;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            z-index: 9999;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            border: 2px solid #2980b9;
         `;
+        
+        // 添加懸停效果
+        multiplayerBtn.onmouseenter = () => {
+            multiplayerBtn.style.background = '#2980b9';
+            multiplayerBtn.style.transform = 'scale(1.05)';
+        };
+        
+        multiplayerBtn.onmouseleave = () => {
+            multiplayerBtn.style.background = '#3498db';
+            multiplayerBtn.style.transform = 'scale(1)';
+        };
+        
+        // 添加閃爍動畫以吸引注意
+        let isGlowing = false;
+        setInterval(() => {
+            if (!isGlowing) {
+                multiplayerBtn.style.boxShadow = '0 4px 20px rgba(52, 152, 219, 0.8)';
+                isGlowing = true;
+            } else {
+                multiplayerBtn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.5)';
+                isGlowing = false;
+            }
+        }, 2000);
+        
         multiplayerBtn.onclick = () => multiplayerUI.show();
         document.body.appendChild(multiplayerBtn);
         

@@ -11,9 +11,9 @@ export class CameraSystem {
         this.currentY = 0;
         this.smoothness = 0.1; // 攝影機跟隨的平滑度 (0.1 = 較平滑, 1.0 = 立即跟隨)
         
-        // World bounds - 讓世界比屏幕大很多
-        this.worldWidth = screenWidth * 3;
-        this.worldHeight = screenHeight * 3;
+        // World bounds - 讓世界比屏幕大很多 (擴大到10倍)
+        this.worldWidth = screenWidth * 10;
+        this.worldHeight = screenHeight * 10;
     }
 
     /**
