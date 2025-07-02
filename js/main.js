@@ -1,6 +1,5 @@
 'use strict';
 
-// Import all our classes
 import Player from './Player.js';
 import Projectile from './Projectile.js';
 import Enemy from './Enemy.js';
@@ -14,6 +13,7 @@ canvas.height = 600;
 
 const characterDisplay = document.getElementById('character-display');
 const weaponDisplay = document.getElementById('weapon-display');
+const xpBarFill = document.getElementById('xp-bar-fill'); // Get the XP bar element
 
 // DATA
 const characterData = {
@@ -24,20 +24,16 @@ const weaponData = {
 };
 
 // GAME STATE
-const player = new Player(canvas.width / 2, canvas.height / 2, characterData.warrior);
-const projectiles = [];
-const enemies = [];
-const xpOrbs = []; // NEW: Array for XP orbs
-
-let weaponCooldownTimer = 0;
-let enemySpawnTimer = 0;
-
+// Player now also needs weaponData to initialize its weapon
+const player = new Player(canvas.width / 2, canvas.height / 2, characterData.warrior, weaponData);
+const projectiles = [], enemies = [], xpOrbs = [];
+let weaponCooldownTimer = 0, enemySpawnTimer = 0;
 const keysPressed = {
     w: false, a: false, s: false, d: false,
     ArrowUp: false, ArrowLeft: false, ArrowDown: false, ArrowRight: false
 };
 
-// INPUT HANDLING
+// INPUT HANDLING (no changes)
 window.addEventListener('keydown', (e) => {
     if (keysPressed.hasOwnProperty(e.key)) keysPressed[e.key] = true;
 });
@@ -47,7 +43,8 @@ window.addEventListener('keyup', (e) => {
 
 // HELPER FUNCTIONS
 function fireWeapon() {
-    const weapon = weaponData[player.currentWeapon];
+    // We now use the player's personal weapon stats
+    const weapon = player.weapon;
     const angle = Math.random() * 2 * Math.PI;
     const vx = Math.cos(angle) * weapon.projectileSpeed;
     const vy = Math.sin(angle) * weapon.projectileSpeed;
@@ -70,58 +67,63 @@ function spawnEnemy() {
 }
 
 function checkCollisions() {
+    // Projectile vs Enemy collision
     projectiles.forEach(proj => {
         enemies.forEach(enemy => {
             if (proj.x < enemy.x + enemy.width && proj.x + proj.width > enemy.x &&
                 proj.y < enemy.y + enemy.height && proj.y + proj.height > enemy.y) {
                 proj.markedForDeletion = true;
                 enemy.markedForDeletion = true;
-                
-                // NEW: When an enemy is hit, spawn an XP orb at its location
                 xpOrbs.push(new XPOrb(enemy.x + enemy.width / 2, enemy.y + enemy.height / 2));
             }
         });
     });
+
+    // NEW: Player vs XPOrb collision
+    xpOrbs.forEach(orb => {
+        if (player.x < orb.x + orb.width && player.x + player.width > orb.x &&
+            player.y < orb.y + orb.height && player.y + player.height > orb.y) {
+            
+            player.gainXP(orb.value); // Player gains XP
+            orb.markedForDeletion = true; // Mark the orb to be removed
+            updateUI(); // Update UI immediately for a responsive feel
+        }
+    });
 }
 
 function updateUI() {
-    characterDisplay.innerHTML = `<b>Character:</b><br>${player.name}`;
-    weaponDisplay.innerHTML = `<b>Weapon:</b><br>${weaponData[player.currentWeapon].name}`;
+    // Update text displays
+    characterDisplay.innerHTML = `<b>Character:</b><br>${player.name} (Lvl ${player.level})`;
+    weaponDisplay.innerHTML = `<b>Weapon:</b><br>${player.weapon.name}`;
+
+    // Update XP bar
+    const xpPercentage = (player.xp / player.xpToNextLevel) * 100;
+    xpBarFill.style.width = `${xpPercentage}%`;
 }
 
 // GAME LOOP FUNCTIONS
 function update() {
-    // 1. Update all game objects
     player.update(keysPressed, canvas);
     enemies.forEach(enemy => enemy.update(player));
     projectiles.forEach(proj => proj.update());
     xpOrbs.forEach(orb => orb.update());
 
-    // 2. Handle timers and spawning
     if (--weaponCooldownTimer <= 0) {
         fireWeapon();
-        weaponCooldownTimer = weaponData[player.currentWeapon].cooldown;
+        // The cooldown is now read from the player's personal weapon stats
+        weaponCooldownTimer = player.weapon.cooldown;
     }
     if (--enemySpawnTimer <= 0) {
         spawnEnemy();
         enemySpawnTimer = 90;
     }
 
-    // 3. Handle collisions
     checkCollisions();
 
-    // 4. Clean up marked items from all arrays
-    for (let i = projectiles.length - 1; i >= 0; i--) {
-        const proj = projectiles[i];
-        if (proj.markedForDeletion || proj.x < 0 || proj.x > canvas.width || proj.y < 0 || proj.y > canvas.height) {
-            projectiles.splice(i, 1);
-        }
-    }
-    for (let i = enemies.length - 1; i >= 0; i--) {
-        if (enemies[i].markedForDeletion) {
-            enemies.splice(i, 1);
-        }
-    }
+    // Clean up all marked items
+    projectiles.splice(0, projectiles.length, ...projectiles.filter(p => !p.markedForDeletion && p.x > -10 && p.x < canvas.width + 10 && p.y > -10 && p.y < canvas.height + 10));
+    enemies.splice(0, enemies.length, ...enemies.filter(e => !e.markedForDeletion));
+    xpOrbs.splice(0, xpOrbs.length, ...xpOrbs.filter(o => !o.markedForDeletion));
 }
 
 function draw() {
@@ -129,7 +131,7 @@ function draw() {
     player.draw(ctx);
     enemies.forEach(enemy => enemy.draw(ctx));
     projectiles.forEach(proj => proj.draw(ctx));
-    xpOrbs.forEach(orb => orb.draw(ctx)); // Draw the XP orbs
+    xpOrbs.forEach(orb => orb.draw(ctx));
 }
 
 function gameLoop() {
@@ -139,5 +141,5 @@ function gameLoop() {
 }
 
 // START GAME
-updateUI();
+updateUI(); // Initial UI setup
 requestAnimationFrame(gameLoop);
