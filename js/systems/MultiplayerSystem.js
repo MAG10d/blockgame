@@ -1,4 +1,4 @@
-import { config } from '../config/env.js';
+import { config } from '../config/config.js';
 
 export class MultiplayerSystem {
     constructor() {
@@ -6,7 +6,8 @@ export class MultiplayerSystem {
         this.connected = false;
         this.playerId = null;
         this.roomId = null;
-        this.serverUrl = config.MULTIPLAYER_SERVER_URL; // 從環境變數載入
+        // 從配置載入伺服器 URL (GitHub Actions 會自動注入到 CONFIG)
+        this.serverUrl = window.CONFIG?.MULTIPLAYER_SERVER_URL || config.SERVER_URL || 'ws://localhost:8787';
         
         // 本地玩家狀態
         this.localPlayer = null;

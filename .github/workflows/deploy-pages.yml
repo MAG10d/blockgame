@@ -1,0 +1,65 @@
+name: Deploy to GitHub Pages with Environment Variables
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Inject environment configuration
+      run: |
+        # 在 index.html 中注入環境變數
+        sed -i 's|<!-- PixiJS CDN -->|<!-- Environment Configuration injected by GitHub Actions -->\
+        <script>\
+        window.CONFIG = {\
+            MULTIPLAYER_SERVER_URL: "${{ secrets.VITE_MULTIPLAYER_SERVER_URL }}",\
+            GAME_VERSION: "1.0.0",\
+            DEBUG_MODE: false,\
+            CONNECTION_TIMEOUT: 5000,\
+            RECONNECT_ATTEMPTS: 3,\
+            PING_INTERVAL: 1000\
+        };\
+        console.log("🚀 GitHub Actions 配置注入完成:", window.CONFIG);\
+        </script>\
+        <!-- PixiJS CDN -->|' index.html
+        
+        echo "✅ 環境配置已注入到 index.html，服務器 URL: ${{ secrets.VITE_MULTIPLAYER_SERVER_URL }}"
+        
+         - name: Verify configuration
+       run: |
+         echo "📋 檢查修改後的 index.html："
+         grep -A 15 "Environment Configuration" index.html || echo "配置注入完成"
+        
+    - name: Setup Pages
+      uses: actions/configure-pages@v3
+      
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v2
+      with:
+        path: '.'
+        
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v2 
