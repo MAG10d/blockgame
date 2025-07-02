@@ -25,8 +25,11 @@ export default class Player {
         this.xp = 0;
         this.xpToNextLevel = 10;
 
-        // Player holds a copy of its weapon's data.
-        this.weapon = { ...weaponData.magicMissile };
+        // Player holds multiple weapons with their own cooldown timers
+        this.weapons = [
+            { ...weaponData.magicMissile, currentCooldown: 0 },
+            { ...weaponData.aimingBolt, currentCooldown: 0 }
+        ];
 
         // Create PixiJS Graphics object with 2.5D enhancements
         this.sprite = new PIXI.Graphics();

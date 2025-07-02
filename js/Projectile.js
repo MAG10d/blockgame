@@ -7,6 +7,7 @@ export default class Projectile {
         this.width = weaponData.projectileSize;
         this.height = weaponData.projectileSize;
         this.color = weaponData.projectileColor;
+        this.damage = weaponData.damage || 20; // Store damage from weapon
         this.markedForDeletion = false;
         
         // Store reference to container
