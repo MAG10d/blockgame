@@ -47,10 +47,10 @@ jobs:
         
         echo "✅ 環境配置已注入到 index.html，服務器 URL: ${{ secrets.VITE_MULTIPLAYER_SERVER_URL }}"
         
-         - name: Verify configuration
-       run: |
-         echo "📋 檢查修改後的 index.html："
-         grep -A 15 "Environment Configuration" index.html || echo "配置注入完成"
+    - name: Verify configuration
+      run: |
+        echo "📋 檢查修改後的 index.html："
+        grep -A 15 "Environment Configuration" index.html || echo "配置注入完成"
         
     - name: Setup Pages
       uses: actions/configure-pages@v3
