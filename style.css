@@ -28,3 +28,17 @@ canvas {
     padding: 5px;
     text-align: left;
 }
+
+#xp-bar-container {
+    height: 20px;
+    background-color: #555;
+    padding: 0; /* Override default padding */
+    border: 2px solid #fff;
+}
+
+#xp-bar-fill {
+    width: 0%; /* Start with an empty bar */
+    height: 100%;
+    background-color: gold;
+    transition: width 0.2s ease-in-out; /* Smooth animation */
+}
