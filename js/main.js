@@ -23,6 +23,10 @@ async function initializeGame() {
     // Initialize PixiJS Application
     const app = new PIXI.Application();
     
+    // Declare canvas dimensions at function scope with default values
+    let canvasWidth = 800;  // Default fallback value
+    let canvasHeight = 600; // Default fallback value
+    
     try {
         await app.init({
             width: window.innerWidth,
@@ -41,21 +45,15 @@ async function initializeGame() {
         gameContainer.appendChild(app.canvas);
         
         // 設置固定畫布大小，留出空間給 UI
-        const canvasWidth = Math.min(1200, window.innerWidth - 40);
-        const canvasHeight = Math.min(800, window.innerHeight - 120);
+        canvasWidth = Math.min(1200, window.innerWidth - 40);
+        canvasHeight = Math.min(800, window.innerHeight - 120);
         app.renderer.resize(canvasWidth, canvasHeight);
-        
-        // Handle window resize
-        function handleResize() {
-            const newCanvasWidth = Math.min(1200, window.innerWidth - 40);
-            const newCanvasHeight = Math.min(800, window.innerHeight - 120);
-            app.renderer.resize(newCanvasWidth, newCanvasHeight);
-            cameraSystem.resize(newCanvasWidth, newCanvasHeight);
-        }
-        window.addEventListener('resize', handleResize);
 
     } catch (error) {
         console.error('Failed to initialize PixiJS:', error);
+        // Even if PixiJS fails, we should set reasonable default values
+        canvasWidth = Math.min(1200, window.innerWidth - 40) || 800;
+        canvasHeight = Math.min(800, window.innerHeight - 120) || 600;
         throw error;
     }
 
@@ -63,13 +61,22 @@ async function initializeGame() {
     const worldContainer = new PIXI.Container();
     app.stage.addChild(worldContainer);
 
-    // Initialize all systems
+    // Initialize all systems - now canvasWidth and canvasHeight are guaranteed to be defined
     const weaponSystem = new WeaponSystem();
     const collisionSystem = new CollisionSystem();
     const inputSystem = new InputSystem(app.canvas || app.view);
     const uiSystem = new UISystem();
     const upgradeSystem = new UpgradeSystem(app);
     const cameraSystem = new CameraSystem(worldContainer, canvasWidth, canvasHeight);
+
+    // Handle window resize - define after cameraSystem is initialized
+    function handleResize() {
+        canvasWidth = Math.min(1200, window.innerWidth - 40);
+        canvasHeight = Math.min(800, window.innerHeight - 120);
+        app.renderer.resize(canvasWidth, canvasHeight);
+        cameraSystem.resize(canvasWidth, canvasHeight);
+    }
+    window.addEventListener('resize', handleResize);
 
     // GAME STATE
     const worldBounds = cameraSystem.getWorldBounds();
