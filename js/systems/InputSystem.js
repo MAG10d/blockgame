@@ -5,7 +5,13 @@ export class InputSystem {
             keys: {
                 w: false, a: false, s: false, d: false,
                 ArrowUp: false, ArrowLeft: false, ArrowDown: false, ArrowRight: false,
-                r: false // R key for respawn
+                r: false, // R key for respawn
+                ' ': false // Space key for firing
+            },
+            mouse: {
+                isPressed: false,
+                x: 0,
+                y: 0
             },
             touch: {
                 isDragging: false,
@@ -35,6 +41,27 @@ export class InputSystem {
             if (this.inputState.keys.hasOwnProperty(e.key)) {
                 this.inputState.keys[e.key] = false;
             }
+        });
+
+        // Mouse Handlers
+        gameCanvas.addEventListener('mousedown', (e) => {
+            this.inputState.mouse.isPressed = true;
+            this.inputState.mouse.x = e.clientX;
+            this.inputState.mouse.y = e.clientY;
+        });
+
+        gameCanvas.addEventListener('mouseup', (e) => {
+            this.inputState.mouse.isPressed = false;
+        });
+
+        gameCanvas.addEventListener('mousemove', (e) => {
+            this.inputState.mouse.x = e.clientX;
+            this.inputState.mouse.y = e.clientY;
+        });
+
+        // Prevent context menu on right click
+        gameCanvas.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
         });
 
         // Touch Handlers for mobile
@@ -101,5 +128,32 @@ export class InputSystem {
      */
     isRespawnPressed() {
         return this.inputState.keys.r;
+    }
+
+    /**
+     * Check if mouse is pressed (for firing weapons)
+     * @returns {boolean} - True if mouse is pressed
+     */
+    get isMousePressed() {
+        return this.inputState.mouse.isPressed;
+    }
+
+    /**
+     * Check if space key is pressed (for firing weapons)
+     * @returns {boolean} - True if space key is pressed
+     */
+    get isSpacePressed() {
+        return this.inputState.keys[' '];
+    }
+
+    /**
+     * Get mouse position
+     * @returns {Object} - Mouse position { x, y }
+     */
+    getMousePosition() {
+        return {
+            x: this.inputState.mouse.x,
+            y: this.inputState.mouse.y
+        };
     }
 } 

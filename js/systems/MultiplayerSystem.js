@@ -202,6 +202,11 @@ export class MultiplayerSystem {
                 console.error('伺服器錯誤:', message.message);
                 this.emit('error', message);
                 break;
+                
+            case 'game_restarted':
+                console.log('遊戲已重新開始:', message.message);
+                this.emit('game_restarted', message);
+                break;
         }
     }
     
@@ -384,5 +389,37 @@ export class MultiplayerSystem {
     
     getPlayerCount() {
         return this.remoteePlayers.size + (this.localPlayer ? 1 : 0);
+    }
+    
+    // 獲取所有玩家
+    getAllPlayers() {
+        const state = this.getInterpolatedState();
+        return state ? Object.values(state.players || {}) : [];
+    }
+    
+    // 獲取存活玩家
+    getAlivePlayers() {
+        return this.getAllPlayers().filter(player => !player.isDead);
+    }
+    
+    // 獲取死亡玩家
+    getDeadPlayers() {
+        return this.getAllPlayers().filter(player => player.isDead);
+    }
+    
+    // 檢查遊戲是否結束
+    isGameEnded() {
+        const alivePlayers = this.getAlivePlayers();
+        return alivePlayers.length <= 1;
+    }
+    
+    // 重新開始遊戲
+    restartGame() {
+        if (this.connected && this.websocket) {
+            this.websocket.send(JSON.stringify({
+                type: 'restart_game',
+                timestamp: Date.now()
+            }));
+        }
     }
 } 

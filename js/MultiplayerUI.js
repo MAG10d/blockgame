@@ -341,4 +341,22 @@ export class MultiplayerUI {
     showError(message) {
         alert(message);
     }
+    
+    updateLobbyInfo() {
+        // 更新大廳信息（玩家列表、房間狀態等）
+        if (this.currentScreen !== 'lobby') return;
+        
+        // 獲取當前房間信息
+        const roomId = this.multiplayerSystem.getRoomId();
+        const playerCount = this.multiplayerSystem.getPlayerCount();
+        
+        // 如果大廳界面存在，更新玩家信息
+        const lobbyContent = document.querySelector('#multiplayer-ui');
+        if (lobbyContent && roomId) {
+            // 重新渲染大廳界面以顯示最新的玩家信息
+            this.showLobby(roomId);
+        }
+        
+        console.log(`大廳信息更新 - 房間: ${roomId}, 玩家數: ${playerCount}`);
+    }
 }
