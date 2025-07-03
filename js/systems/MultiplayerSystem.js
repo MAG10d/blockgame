@@ -9,6 +9,14 @@ export class MultiplayerSystem {
         // 從配置載入伺服器 URL (GitHub Actions 會自動注入到 CONFIG)
         this.serverUrl = window.CONFIG?.MULTIPLAYER_SERVER_URL || config.SERVER_URL || 'ws://localhost:8787';
         
+        // 為 HTTP API 請求創建對應的 HTTP URL
+        this.httpUrl = this.serverUrl
+            .replace('wss://', 'https://')
+            .replace('ws://', 'http://');
+        
+        console.log('WebSocket URL:', this.serverUrl);
+        console.log('HTTP API URL:', this.httpUrl);
+        
         // 本地玩家狀態
         this.localPlayer = null;
         this.remoteePlayers = new Map();
@@ -46,9 +54,20 @@ export class MultiplayerSystem {
     // 創建房間
     async createRoom() {
         try {
-            const response = await fetch(`${this.serverUrl}/api/create-room`, {
-                method: 'POST'
+            console.log('正在創建房間，API URL:', `${this.httpUrl}/api/create-room`);
+            
+            const response = await fetch(`${this.httpUrl}/api/create-room`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                // 添加超時處理
+                signal: AbortSignal.timeout(10000) // 10秒超時
             });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
             
             const data = await response.json();
             
@@ -57,10 +76,12 @@ export class MultiplayerSystem {
                 console.log('房間創建成功:', data.roomId);
                 this.emit('room_created', { roomId: data.roomId });
                 return data.roomId;
+            } else {
+                throw new Error('伺服器未返回房間ID');
             }
         } catch (error) {
             console.error('創建房間失敗:', error);
-            this.emit('error', { message: '創建房間失敗' });
+            this.emit('error', { message: `創建房間失敗: ${error.message}` });
         }
         return null;
     }
@@ -68,11 +89,19 @@ export class MultiplayerSystem {
     // 加入房間
     async joinRoom(roomId) {
         try {
-            const response = await fetch(`${this.serverUrl}/api/join-room`, {
+            console.log('正在加入房間，API URL:', `${this.httpUrl}/api/join-room`);
+            
+            const response = await fetch(`${this.httpUrl}/api/join-room`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ roomId })
+                body: JSON.stringify({ roomId }),
+                // 添加超時處理
+                signal: AbortSignal.timeout(10000) // 10秒超時
             });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
             
             const data = await response.json();
             
@@ -88,7 +117,7 @@ export class MultiplayerSystem {
             return true;
         } catch (error) {
             console.error('加入房間失敗:', error);
-            this.emit('error', { message: '加入房間失敗' });
+            this.emit('error', { message: `加入房間失敗: ${error.message}` });
         }
         return false;
     }
